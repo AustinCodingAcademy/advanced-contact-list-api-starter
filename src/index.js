@@ -78,7 +78,12 @@ app.get('/contacts', (request, response) => {
   return response.json(contacts);
 });
 
-// app.get('/*', (request, response) => {});
+app.get('contacts/*', (request, response) => {
+  const selectedContact = contacts.filter((contact) => {
+    return contact._id === parseInt(request.params[0], 10);
+  });
+  return response.json(selectedContact[0]);
+});
 
 app.listen(PORT, (err) => {
   if (err) {
