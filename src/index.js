@@ -1,54 +1,93 @@
-// Import the express module
+// Require the express module (package.json)
 import express from 'express';
+// Can also use const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+
 
 // Create a new instance of express
 const app = express();
 
+
+// Connect to the mongo database
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/contact-list');
+
+
+// Middleware that parses incoming request bodies, and makes the payload
+// available to use through request.body
+app.use(bodyParser.json());
+
+const ContactModel = require('./models/ContactModel');
+
 // Declare a GET /contacts route
 app.get('/contacts', (request, response) => {
-  const contacts = [
-    {
-      _id: 1,
-      name: 'Dale Cooper',
-      occupation: 'FBI Agent',
-      avatar: 'https://upload.wikimedia.org/wikipedia/en/5/50/Agentdalecooper.jpg'
-    },
-    {
-      _id: 2,
-      name: 'Spike Spiegel',
-      occupation: 'Bounty Hunter',
-      avatar: 'http://vignette4.wikia.nocookie.net/deadliestfiction/images/d/de/Spike_Spiegel_by_aleztron.jpg/revision/latest?cb=20130920231337'
-    },
-    {
-      _id: 3,
-      name: 'Wirt',
-      occupation: 'adventurer',
-      avatar: 'http://66.media.tumblr.com/5ea59634756e3d7c162da2ef80655a39/tumblr_nvasf1WvQ61ufbniio1_400.jpg'
-    },
-    {
-      _id: 4,
-      name: 'Michael Myers',
-      occupation: 'Loving little brother',
-      avatar: 'http://vignette2.wikia.nocookie.net/villains/images/e/e3/MMH.jpg/revision/latest?cb=20150810215746'
-    },
-    {
-      _id: 5,
-      name: 'Dana Scully',
-      occupation: 'FBI Agent',
-      avatar: 'https://pbs.twimg.com/profile_images/718881904834056192/WnMTb__R.jpg'
-    }
-  ];
-
-  return response.json(contacts);
+  ContactModel.find().exec()
+    .then(contacts => {
+      return response.json(contacts);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
 });
 
-// Declare our route
+app.get('/contacts/:_id', (request, response) => {
+  ContactModel.findById(request.params._id).exec()
+    .then(contact => {
+      return response.json(contact);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
+});
+
+
+// Declare a DELETE /contacts route
+// This query fins the contact by ._id and deletes the contact
+app.delete('/contacts/:_id', (request, response) => {
+  ContactModel.findByIdAndRemove(request.params._id).exec()
+    .then(contact => {
+      return response.json(contact);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
+});
+
+
+// Declare a POST /contacts route.  Creates a new contact
+app.post('/contacts', (request, response) => {
+  // Creates a new instance of the 'ContactModel'
+  // We are grabbing attributes from the request.body object.
+  // This is set because we are using body-parser.
+  // Constructor function creates a new ContactModel
+  const contact = new ContactModel({
+    name: request.body.name,
+    occupation: request.body.occupation,
+    avatar: request.body.avatar,
+  });
+
+  // Saves the new contact
+  contact.save()
+    // When the save completes, return the newly created contact
+    .then(contact => {
+      return response.json(contact);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
+});
+
+
+// Declare the route
 app.all('/*', (request, response) => {
   return response.send(request.params['0']);
 });
 
+
 // Set our port to server the application on
 const PORT = 3001;
+
 
 // Tell our instance of express to listen to request made on our port
 app.listen(PORT, (err) => {
