@@ -2,6 +2,7 @@
 import express from 'express';
 // Can also use const mongoose = require('mongoose');
 import mongoose from 'mongoose';
+import ContactModel from './models/ContactModel';
 import bodyParser from 'body-parser';
 
 
@@ -18,7 +19,6 @@ mongoose.connect('mongodb://localhost/contact-list');
 // available to use through request.body
 app.use(bodyParser.json());
 
-const ContactModel = require('./models/ContactModel');
 
 // Declare a GET /contacts route
 app.get('/contacts', (request, response) => {
@@ -70,6 +70,29 @@ app.post('/contacts', (request, response) => {
   // Saves the new contact
   contact.save()
     // When the save completes, return the newly created contact
+    .then(newContact => {
+      return response.json(newContact);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
+});
+
+
+// Declare a PUT /contacts route.  Updates (or changes) a contact
+app.put('/contacts/:_id', (request, response) => {
+  ContactModel.findById(request.params._id).exec()
+    .then(contact => {
+      // Set the attributes on the model from the request.body OR
+      // if we receive nothing, use what the contact is already set to.
+      // This way if we send an update for just the 'avatar' field,
+      // the name and the occupation will not change.
+      contact.name = request.body.name || contact.name;
+      contact.occupation = request.body.occupation || contact.occupation;
+      contact.avatar = request.body.avatar || contact.avatar;
+
+      return contact.save();
+    })
     .then(contact => {
       return response.json(contact);
     })
