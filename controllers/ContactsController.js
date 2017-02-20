@@ -1,4 +1,4 @@
-import ContactModel from '../src/models/ContactModel';
+import ContactModel from '../models/ContactModel';
 
 const contactsController = {};
 
