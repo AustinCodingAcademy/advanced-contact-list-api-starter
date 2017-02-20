@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const actionHistorySchema = new mongoose.schema({
+const actionHistorySchema = new mongoose.Schema({
   itemText: {
     required: true,
     type: String
