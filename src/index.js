@@ -1,9 +1,16 @@
 // Your server code here...
 import express from 'express';
-
-const PORT = 3001;
+import ContactModel from './model/ContactModel';
+import bodyParser from 'body-parser';
 
 const app = express();
+
+// Connect to our mongo database
+import mongoose from 'mongoose';
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/contact-list');
+
+app.use(bodyParser.json());
 
 app.use((request, response, next) => {
   response.header('Access-Control-Allow-Origin', '*');
@@ -11,79 +18,70 @@ app.use((request, response, next) => {
   next();
 });
 
-const contacts = [
-  {
-    _id: 1,
-    name: 'Dale Cooper',
-    occupation: 'FBI Agent',
-    avatar: 'https://upload.wikimedia.org/wikipedia/en/5/50/Agentdalecooper.jpg'
-  },
-  {
-    _id: 2,
-    name: 'Spike Spiegel',
-    occupation: 'Bounty Hunter',
-    avatar: 'http://vignette4.wikia.nocookie.net/deadliestfiction/images/d/de/Spike_Spiegel_by_aleztron.jpg/revision/latest?cb=20130920231337'
-  },
-  {
-    _id: 3,
-    name: 'Wirt',
-    occupation: 'adventurer',
-    avatar: 'http://66.media.tumblr.com/5ea59634756e3d7c162da2ef80655a39/tumblr_nvasf1WvQ61ufbniio1_400.jpg'
-  },
-  {
-    _id: 4,
-    name: 'Michael Myers',
-    occupation: 'Loving little brother',
-    avatar: 'http://vignette2.wikia.nocookie.net/villains/images/e/e3/MMH.jpg/revision/latest?cb=20150810215746'
-  },
-  {
-    _id: 5,
-    name: 'Dana Scully',
-    occupation: 'FBI Agent',
-    avatar: 'https://pbs.twimg.com/profile_images/718881904834056192/WnMTb__R.jpg'
-  },
-  {
-    name: 'Beyonce',
-    occupation: 'Singer',
-    avatar: 'http://media1.policymic.com/site/article-items/27957/2_gif.gif',
-    _id: 6
-  },
-  {
-    name: 'Henry Cavill',
-    occupation: 'Actor',
-    avatar: 'https://s-media-cache-ak0.pinimg.com/originals/c1/2c/e6/c12ce6d7e4b9987024996bc5c8dbc82c.jpg',
-    _id: 7
-  },
-  {
-    name: 'Katya Zamolodchikova',
-    occupation: 'Drag Queen',
-    avatar: 'https://static1.squarespace.com/static/547384c2e4b080be34ce3327/t/547d264ce4b07da997f79d14/1417487950751/Katya_2014_SMJ_08.jpg?format=2500w',
-    _id: 8
-  },
-  {
-    name: 'Carrie Fisher',
-    occupation: 'Bad ass and Space Twin 1',
-    avatar: 'https://si.wsj.net/public/resources/images/BN-LN957_STARWA_12S_20151203125155.jpg',
-    _id: 9
-  },
-  {
-    name: 'Mark Hamel',
-    occupation: 'Actor and Space Twin 2',
-    avatar: 'https://www.sideshowtoy.com/wp-content/uploads/2015/09/MarkHamillGuardiansPremiere_article_story_large.jpg',
-    _id: 10
-  }
-];
-
 app.get('/contacts', (request, response) => {
-  return response.json(contacts);
+  ContactModel.find({}).exec()
+    .then(contacts => {
+      return response.json(contacts);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
 });
 
-app.get('contacts/*', (request, response) => {
-  const selectedContact = contacts.filter((contact) => {
-    return contact._id === parseInt(request.params[0], 10);
-  });
-  return response.json(selectedContact[0]);
+app.get('/contacts/:_id', (request, response) => {
+  ContactModel.findById(request.params._id).exec()
+    .then(contact => {
+      return response.json(contact);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
 });
+
+app.delete('/contacts/:_id', (request, response) => {
+  ContactModel.findByIdAndRemove(request.params._id).exec()
+      .then(contact => {
+        return response.json(contact);
+      })
+      .catch(err => {
+        return console.log(`Error ${err}`);
+      });
+});
+
+app.post('/contacts', (request, response) => {
+  const contact = new ContactModel({
+    name: request.body.name,
+    occupation: request.body.occupation,
+    avatar: request.body.avatar,
+  });
+
+  contact.save()
+    .then(contactToSave => {
+      return response.json(contactToSave);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
+});
+
+app.put('/contacts/:_id', (request, response) => {
+  ContactModel.findById(request.params._id).exec()
+    .then(contact => {
+      contact.name = request.body.name || contact.name;
+      contact.occupation = request.body.occupation || contact.occupation;
+      contact.avatar = request.body.avatar || contact.avatar;
+
+      return contact.save();
+    })
+    .then(contact => {
+      return response.json(contact);
+    })
+    .catch(err => {
+      return console.log(`Error ${err}`);
+    });
+});
+
+const PORT = 3001;
 
 app.listen(PORT, (err) => {
   if (err) {
