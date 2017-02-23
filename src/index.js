@@ -3,6 +3,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import ContactRoutes from './routes/ContactRoutes';
+import AddedContactRoutes from './routes/AddedContactRoutes';
 // initialize express
 const app = express();
 
@@ -16,6 +17,7 @@ mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/contact-list');
 app.use(bodyParser.json());
 app.use(ContactRoutes);
+app.use(AddedContactRoutes);
 
 app.use(function (err, request, response) {
   return response.status(500).send('something went wrong');

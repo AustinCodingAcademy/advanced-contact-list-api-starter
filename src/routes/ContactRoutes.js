@@ -1,70 +1,25 @@
 import express from 'express';
-import ContactModel from '../models/ContactModel';
+import ContactsController from '../controllers/ContactsController';
 
 const router = express.Router();
 router.get('/contacts', function (request, response, next) {
-  ContactModel.find().exec()
-    .then(contacts => {
-      return response.json(contacts);
-    })
-    .catch(err => {
-      return next(err);
-    });
+  ContactsController.list(request, response, next);
 });
 
-router.get('contacts/:_id', function (request, response, next) {
-  ContactModel.findById(request.params._id).exec()
-  .then(contact => {
-    return response.json(contact);
-  })
-  .catch(err => {
-    return next(err);
-  });
+router.get('/contacts/:_id', function (request, response, next) {
+  ContactsController.show(request, response, next);
 });
 
 router.delete('/contacts/:_id', function (request, response, next) {
-  ContactModel.findByIdAndRemove(request.params._id).exec()
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(err => {
-      return next(err);
-    });
+  ContactsController.remove(request, response, next);
 });
 
-router.post('/contacts', function (request, response) {
-  const newContact = new ContactModel({
-    name: request.body.name,
-    occupation: request.body.occupation,
-    avatar: request.body.avatar,
-  });
-
-  // Save the new contact
-  newContact.save()
-    // When the save completes, return the newly created contact
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(err => {
-      return console.log(`Error ${err}`);
-    });
+router.post('/contacts', function (request, response, next) {
+  ContactsController.create(request, response, next);
 });
 
 router.put('/contacts/:_id', function (request, response, next) {
-  ContactModel.findById(request.params._id)
-    .then(contact => {
-      contact.name = request.body.name || contact.name;
-      contact.occupation = request.body.occupation || contact.occupation;
-      contact.avatar = request.body.avatar || contact.avatar;
-
-      return contact.save();
-    })
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(err => {
-      return next(err);
-    });
+  ContactsController.update(request, response, next);
 });
 
-module.exports = router;
+export default router;
