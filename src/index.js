@@ -1,9 +1,9 @@
 // Your server code here...
 import express from 'express';
 import mongoose from 'mongoose';
-import ContactModel from './models/ContactModel';
 import ActionHistoryModel from './models/ActionHistoryModel';
 import bodyParser from 'body-parser';
+import ContactRouter from './routes/ContactRouter';
 
 const app = express();
 
@@ -22,15 +22,17 @@ app.use((request, response, next) => {
   next();
 });
 
-app.get('/contacts', (request, response) => {
-  ContactModel.find({}).exec()
-    .then(data => {
-      return response.json(data);
-    })
-    .catch(error => {
-      console.log(`Something went wrong with the contacts list!' ${error}`);
-    });
-});
+app.use(ContactRouter);
+
+// app.get('/contacts', (request, response) => {
+//   ContactModel.find({}).exec()
+//     .then(data => {
+//       return response.json(data);
+//     })
+//     .catch(error => {
+//       console.log(`Something went wrong with the contacts list! ${error}`);
+//     });
+// });
 
 app.get('/actionhistory', (request, response) => {
   ActionHistoryModel.find({}).exec()
@@ -42,15 +44,15 @@ app.get('/actionhistory', (request, response) => {
     });
 });
 
-app.get('/contacts/:_id', (request, response) => {
-  ContactModel.findById(request.params._id).exec()
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(err => {
-      return console.log(`Error ${err}`);
-    });
-});
+// app.get('/contacts/:_id', (request, response) => {
+//   ContactModel.findById(request.params._id).exec()
+//     .then(contact => {
+//       return response.json(contact);
+//     })
+//     .catch(err => {
+//       return console.log(`Error ${err}`);
+//     });
+// });
 
 app.get('/actionhistory/:_id', (request, response) => {
   ActionHistoryModel.findById(request.params._id).exec()
@@ -62,15 +64,15 @@ app.get('/actionhistory/:_id', (request, response) => {
     });
 });
 
-app.delete('/contacts/:_id', (request, response) => {
-  ContactModel.findByIdAndRemove(request.params._id).exec()
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(error => {
-      return console.log(`Error! ${error}`);
-    });
-});
+// app.delete('/contacts/:_id', (request, response) => {
+//   ContactModel.findByIdAndRemove(request.params._id).exec()
+//     .then(contact => {
+//       return response.json(contact);
+//     })
+//     .catch(error => {
+//       return console.log(`Error! ${error}`);
+//     });
+// });
 
 app.delete('/actionhistory/:_id', (request, response) => {
   ActionHistoryModel.findByIdAndRemove(request.params._id).exec()
@@ -82,25 +84,24 @@ app.delete('/actionhistory/:_id', (request, response) => {
     });
 });
 
-app.post('/contacts', (request, response) => {
-  console.log(request.body);
-
-  // add validation code
-
-  const model = ContactModel({
-    name: request.body.name,
-    occupation: request.body.occupation,
-    avatar: request.body.avatar
-  });
-
-  model.save()
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(error => {
-      console.log(`Error! ${error}`);
-    });
-});
+// app.post('/contacts', (request, response) => {
+//
+//   // add validation code
+//
+//   const model = ContactModel({
+//     name: request.body.name,
+//     occupation: request.body.occupation,
+//     avatar: request.body.avatar
+//   });
+//
+//   model.save()
+//     .then(contact => {
+//       return response.json(contact);
+//     })
+//     .catch(error => {
+//       console.log(`Error! ${error}`);
+//     });
+// });
 
 app.post('/actionhistory', (request, response) => {
   console.log(request.body);
@@ -119,7 +120,6 @@ app.post('/actionhistory', (request, response) => {
       console.log(`Error! ${error}`);
     });
 });
-
 
 app.all('/*', (request, response) => {
   return response.send(request.params['0']);
