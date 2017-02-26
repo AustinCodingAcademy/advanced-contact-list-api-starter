@@ -22,7 +22,8 @@ app.use(bodyParser.json());
 // Add ContactRoutes to application
 app.use(contactRoutes);
 
-app.use(function (err, request, response) {
+/* eslint no-unused-vars: 0*/
+app.use(function (err, request, response, next) {
   return response.status(500).send('Uh oh something went wrong! ' + err);
 });
 
@@ -32,6 +33,7 @@ const PORT = 3001;
 
 
 // Tell our instance of express to listen to request made on our port
+/* eslint no-console: 0*/
 app.listen(PORT, (err) => {
   if (err) {
     return console.log('Error!', err);

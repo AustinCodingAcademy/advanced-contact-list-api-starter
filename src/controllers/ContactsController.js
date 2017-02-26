@@ -51,7 +51,7 @@ contactsController.create = ( (request, response, next) => {
 
 // Declare a (PUT = update) route.  Updates (or changes) a contact
 contactsController.update = ( (request, response, next) => {
-  ContactModel.findById(request.params._id)
+  ContactModel.findById(request.params._id).exec()
     .then(contact => {
       // Set the attributes on the model from the request.body OR
       // if we receive nothing, use what the contact is already set to.
