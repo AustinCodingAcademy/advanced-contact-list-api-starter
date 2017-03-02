@@ -1,12 +1,13 @@
 // Your server code here...
 import express from 'express';
-import ContactModel from './model/ContactModel';
 import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import contactRoutes from './routes/ContactRoutes';
+import actionHistoryRoutes from './routes/ActionHistoryRoutes';
 
 const app = express();
 
-// Connect to our mongo database
-import mongoose from 'mongoose';
+/* eslint-disable max-len */
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/contact-list');
 
@@ -15,70 +16,17 @@ app.use(bodyParser.json());
 app.use((request, response, next) => {
   response.header('Access-Control-Allow-Origin', '*');
   response.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  response.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
   next();
 });
 
-app.get('/contacts', (request, response) => {
-  ContactModel.find({}).exec()
-    .then(contacts => {
-      return response.json(contacts);
-    })
-    .catch(err => {
-      return console.log(`Error ${err}`);
-    });
-});
+app.use(contactRoutes);
 
-app.get('/contacts/:_id', (request, response) => {
-  ContactModel.findById(request.params._id).exec()
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(err => {
-      return console.log(`Error ${err}`);
-    });
-});
+app.use(actionHistoryRoutes);
 
-app.delete('/contacts/:_id', (request, response) => {
-  ContactModel.findByIdAndRemove(request.params._id).exec()
-      .then(contact => {
-        return response.json(contact);
-      })
-      .catch(err => {
-        return console.log(`Error ${err}`);
-      });
-});
-
-app.post('/contacts', (request, response) => {
-  const contact = new ContactModel({
-    name: request.body.name,
-    occupation: request.body.occupation,
-    avatar: request.body.avatar,
-  });
-
-  contact.save()
-    .then(contactToSave => {
-      return response.json(contactToSave);
-    })
-    .catch(err => {
-      return console.log(`Error ${err}`);
-    });
-});
-
-app.put('/contacts/:_id', (request, response) => {
-  ContactModel.findById(request.params._id).exec()
-    .then(contact => {
-      contact.name = request.body.name || contact.name;
-      contact.occupation = request.body.occupation || contact.occupation;
-      contact.avatar = request.body.avatar || contact.avatar;
-
-      return contact.save();
-    })
-    .then(contact => {
-      return response.json(contact);
-    })
-    .catch(err => {
-      return console.log(`Error ${err}`);
-    });
+// eslint-disable-next-line
+app.use((error, request, response, next) => {
+  return response.status(500).send('Uh oh, something went wrong! ' + error);
 });
 
 const PORT = 3001;
