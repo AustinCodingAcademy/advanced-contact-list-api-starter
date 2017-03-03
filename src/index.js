@@ -15,7 +15,7 @@ mongoose.connect('mongodb://localhost/contact-list');
 // Middleware
 app.use(bodyParser.json());
 app.use(contactRoutes);
-app.use((err, request, response) => response.status(500).send('Request error! ' + err));
+app.use((err, request, response, next) => response.status(500).send('Request error! ' + err));
 
 // Set our port to server the application on
 const PORT = 3001;
