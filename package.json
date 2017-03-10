@@ -19,7 +19,9 @@
     "url": "https://github.com/AustinCodingAcademy/advanced-contact-list-api-starter/issues"
   },
   "homepage": "https://github.com/AustinCodingAcademy/advanced-contact-list-api-starter#readme",
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.15.2"
+  },
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-core": "^6.18.2",
