@@ -3,7 +3,7 @@ import express from 'express';
 
 const app = express();
 
-app.get('/contacts', (request, response) => {
+app.get('/contacts', (request, response, next) => {
   const contacts = [
     {
       _id: 1,
@@ -22,7 +22,7 @@ app.get('/contacts', (request, response) => {
   return response.json(contacts);
 });
 
-app.all('/*', (request, response) => {
+app.all('/*', (request, response, next) => {
   return response.send(request.params['0']);
 });
 
@@ -32,4 +32,6 @@ app.listen(PORT, (err) => {
   if (err) {
     return console.log('Error!', err);
   }
+
+  return oonsole.log('Listening on: http://localhost:' + PORT);
 });
